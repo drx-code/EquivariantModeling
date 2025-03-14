@@ -10,24 +10,21 @@ dependencies:
   - pytorch=2.2.2
   - torchvision=0.17.2
   - numpy=1.22
+  - opencv-python==4.1.2.30
+  - clip
+  - omegaconf==2.1.1
+  - pytorch_lightning==1.4.2
+  - torchmetrics==0.5.0 
+  - test-tube
+  - albumentations
+  - kornia 
+  - matplotlib 
+  - einops 
+  - diffusers
+  - opencv-python==4.1.2.30
+  - timm==0.9.12
+  - tensorboard==2.10.0
+  - scipy==1.9.1
+  - gdown==5.2.0
   - pip:
-    - opencv-python==4.1.2.30
-    - timm==0.9.12
-    - tensorboard==2.10.0
-    - scipy==1.9.1
-    - gdown==5.2.0
-    - -e git+https://github.com/LTH14/torch-fidelity.git@master#egg=torch-fidelity
-    - clip
-    - omegaconf==2.1.1
-    - pytorch_lightning==1.4.2
-    - torchmetrics==0.5.0 
-    - test-tube
-    - albumentations
-    - kornia 
-    - torchinfo 
-    - matplotlib 
-    - accelerate 
-    - webdataset 
-    - einops 
-    - clean-fid 
-    - diffusers
+  - -e git+https://github.com/LTH14/torch-fidelity.git@master#egg=torch-fidelity
