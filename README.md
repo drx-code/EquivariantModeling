@@ -60,8 +60,14 @@ A suitable [conda](https://conda.io/) environment named `equivariant` can be cre
 conda env create -f environment.yaml
 conda activate equivariant
 ```
+Download the pre-trained tokenizer and generative models trained on the filtered Places dataset:
+```
+sh scripts/download.sh
+```
+For convenience, pre-trained models can be downloaded directly here as well:
 
-Our pre-trained tokenizer and generative models can be downloaded directly here: 
+* [Equivariant 1D tokenizer](https://huggingface.co/UmiSonoda16/EquivariantModeling/resolve/main/tokenizer.ckpt?download=true)
+* [Equivariant 1D generator (Places-large)](https://huggingface.co/UmiSonoda16/EquivariantModeling/resolve/main/places_large.ckpt?download=true)
 
 ## ✨ Model Training 
 
@@ -83,7 +89,7 @@ Logs and checkpoints for trained models are saved to `logs/<START_DATE_AND_TIME>
 
 ### Generator Training
 The training of our equivariant generators with the ImageNet can be started by running 
-* Our small geneator
+* Our small generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     train_generator.py \
@@ -96,7 +102,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
-* Our base geneator
+* Our base generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     train_generator.py \
@@ -109,7 +115,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
-* Our large geneator
+* Our large generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     train_generator.py \
@@ -122,7 +128,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
-* Our huge geneator
+* Our huge generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     train_generator.py \
