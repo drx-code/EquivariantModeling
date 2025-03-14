@@ -318,7 +318,6 @@ class EquivariantGenerativeModel(nn.Module):
                  num_sampling_steps='100',
                  diffusion_batch_mul=4,
                  grad_checkpointing=False,
-                 learn_sigma=True,
                  cond_length=0,
                  shift_num=16,
                  ):
@@ -367,7 +366,6 @@ class EquivariantGenerativeModel(nn.Module):
             depth=diffloss_d,
             num_sampling_steps=num_sampling_steps,
             grad_checkpointing=grad_checkpointing,
-            learn_sigma=learn_sigma
         )
         self.diffusion_batch_mul = diffusion_batch_mul
 

@@ -15,7 +15,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, Callback, LearningRateM
 from pytorch_lightning.utilities import rank_zero_only
 from packaging import version
 from tokenizer.data.utils import custom_collate
-from tokenizer.models.vqgan import instantiate_from_config
+from tokenizer.models.tokenizer import instantiate_from_config
 
 def get_parser(**parser_kwargs):
     def str2bool(v):
@@ -95,7 +95,14 @@ def get_parser(**parser_kwargs):
         "--nodes",
         type=int,
         default=2,
-        help="seed for seed_everything",
+        help="number of nodes",
+    )
+    parser.add_argument(
+        "-ngpu",
+        "--num_gpu",
+        type=int,
+        default=8,
+        help="number of gpus per node",
     )
     parser.add_argument(
         "-f",
@@ -413,13 +420,13 @@ if __name__ == "__main__":
         trainer_config["distributed_backend"] = "ddp"
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
-        if not "gpus" in trainer_config:
-            del trainer_config["distributed_backend"]
-            cpu = True
-        else:
-            gpuinfo = trainer_config["gpus"]
-            print(f"Running on GPUs {gpuinfo}")
-            cpu = False
+        # if not "gpus" in trainer_config:
+        #     del trainer_config["distributed_backend"]
+        #     cpu = True
+        # else:
+        #     gpuinfo = trainer_config["gpus"]
+        #     print(f"Running on GPUs {gpuinfo}")
+        #     cpu = False
         
         # change the number of used nodes
         trainer_config["num_nodes"] = opt.nodes
@@ -539,10 +546,7 @@ if __name__ == "__main__":
 
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
-        if not cpu:
-            ngpu = len(lightning_config.trainer.gpus.strip(",").split(','))
-        else:
-            ngpu = 1
+        ngpu = opt.num_gpu
         if 'accumulate_grad_batches' in lightning_config.trainer:
             accumulate_grad_batches = lightning_config.trainer.accumulate_grad_batches
         else:

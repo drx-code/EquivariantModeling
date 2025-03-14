@@ -17,7 +17,6 @@ import torchvision.datasets as datasets
 
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
-from util.loader import CachedFolder
 
 from generator import equ_modeling
 from generator.engine_generator import train_one_epoch
@@ -49,12 +48,12 @@ def get_args_parser():
             return False
         else:
             raise argparse.ArgumentTypeError("Boolean value expected.")
-    parser = argparse.ArgumentParser('MAR training with Diffusion Loss', add_help=False)
+    parser = argparse.ArgumentParser('Generator training', add_help=False)
     parser.add_argument('--batch_size', default=16, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * # gpus')
     parser.add_argument('--epochs', default=400, type=int)
 
-    # Model parameters
+    # Model size parameters
     parser.add_argument('--model', default='large_model', type=str, metavar='MODEL',
                         help='Name of model to train')
 
@@ -65,6 +64,8 @@ def get_args_parser():
                         help='vae output embedding dimension')
     parser.add_argument('--vae_norm', default=0.2325, type=float, required=True)
     parser.add_argument('--token_num', default=128, type=int)
+    parser.add_argument('--config_path', default='', help='path to config file')
+    parser.add_argument("--std", default=2.5, type=float)
 
     # Generation parameters
     parser.add_argument('--num_iter', default=64, type=int,
@@ -74,10 +75,7 @@ def get_args_parser():
     parser.add_argument('--cfg', default=1.0, type=float, help="classifier-free guidance")
     parser.add_argument('--cfg_schedule', default="linear", type=str)
     parser.add_argument('--label_drop_prob', default=0.1, type=float)
-    parser.add_argument('--save_last_freq', type=int, default=5, help='save last frequency')
-    parser.add_argument('--save_freq', type=int, default=50, help='save last frequency')
-
-    # Optimizer parameters
+    # Training parameters
     parser.add_argument('--weight_decay', type=float, default=0.02,
                         help='weight decay (default: 0.02)')
 
@@ -96,12 +94,18 @@ def get_args_parser():
     parser.add_argument('--grad_clip', type=float, default=3.0,
                         help='Gradient clip')
     
-    # params
+    # Saving parameters
+    parser.add_argument('--save_last_freq', type=int, default=5, help='save last frequency')
+    parser.add_argument('--save_freq', type=int, default=50, help='save last frequency')
+
+    # Transformer model parameters
     parser.add_argument('--attn_dropout', type=float, default=0.1,
                         help='attention dropout')
     parser.add_argument('--proj_dropout', type=float, default=0.1,
                         help='projection dropout')
     parser.add_argument('--buffer_size', type=int, default=64)
+    parser.add_argument("--cond_length", default=0, type=int)
+    parser.add_argument("--shift_num", type=int, default=16)
 
     # Diffusion Loss params
     parser.add_argument('--diffloss_d', type=int, default=12)
@@ -132,8 +136,10 @@ def get_args_parser():
                         help='Pin CPU memory in DataLoader for more efficient (sometimes) transfer to GPU.')
     parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
     parser.set_defaults(pin_mem=True)
+    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False)
+    parser.add_argument('--ckpt', default='checkpoint-last.pth', help='path to checkpoint file')
 
-    # distributed training parameters
+    # Distributed training parameters
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
@@ -141,18 +147,6 @@ def get_args_parser():
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
 
-    # caching latents
-    parser.add_argument('--use_cached', action='store_true', dest='use_cached',
-                        help='Use cached latents')
-    parser.set_defaults(use_cached=False)
-    parser.add_argument('--cached_path', default='', help='path to cached latents')
-    parser.add_argument('--config_path', default='', help='path to config  file')
-    parser.add_argument('--ckpt', default='checkpoint-last.pth', help='path to checkpoint file')
-    parser.add_argument("--learn_sigma", type=str2bool, nargs="?", const=True, default=False)
-    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False)
-    parser.add_argument("--cond_length", default=0, type=int)
-    parser.add_argument("--std", default=2.5, type=float)
-    parser.add_argument("--shift_num", type=int, default=16)
     return parser
 
 
@@ -190,10 +184,7 @@ def main(args):
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ])
 
-    if args.use_cached:
-        dataset_train = CachedFolder(args.cached_path)
-    else:
-        dataset_train = datasets.ImageFolder(os.path.join(args.data_path), transform=transform_train)
+    dataset_train = datasets.ImageFolder(os.path.join(args.data_path), transform=transform_train)
     print(dataset_train)
 
     sampler_train = torch.utils.data.DistributedSampler(
@@ -227,7 +218,6 @@ def main(args):
         diffusion_batch_mul=args.diffusion_batch_mul,
         grad_checkpointing=args.grad_checkpointing,
         token_num=args.token_num,
-        learn_sigma=args.learn_sigma,
         cond_length = args.cond_length,
         shift_num = args.shift_num
     )

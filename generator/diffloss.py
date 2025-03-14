@@ -10,14 +10,14 @@ from diffusion.flows import RectifiedFlow
 
 class DiffLoss(nn.Module):
     """Diffusion Loss"""
-    def __init__(self, target_channels, z_channels, depth, width, num_sampling_steps, learn_sigma=True, grad_checkpointing=False):
+    def __init__(self, target_channels, z_channels, depth, width, num_sampling_steps, grad_checkpointing=False):
         super(DiffLoss, self).__init__()
         self.in_channels = target_channels
         self.num_sampling_steps = num_sampling_steps
         self.net = SimpleMLPAdaLN(
             in_channels=target_channels,
             model_channels=width,
-            out_channels=target_channels * 2 if learn_sigma else target_channels,  # for vlb loss
+            out_channels=target_channels,  # for vlb loss
             z_channels=z_channels,
             num_res_blocks=depth,
             grad_checkpointing=grad_checkpointing

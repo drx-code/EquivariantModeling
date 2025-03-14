@@ -1,6 +1,6 @@
 model:
   base_learning_rate: 1.92e-4
-  target: tokenizer.models.vqgan.EquivariantTokenizer
+  target: tokenizer.models.tokenizer.EquivariantTokenizer
   params:
     embed_dim: 256
     use_ema: true

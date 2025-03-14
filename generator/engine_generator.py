@@ -6,7 +6,6 @@ import torch
 
 import util.misc as misc
 import util.lr_sched as lr_sched
-from tokenizer.modules.distributions.distributions import GaussianDistribution
 import torch_fidelity
 import cv2
 import numpy as np
@@ -41,7 +40,6 @@ def train_one_epoch(model, vae,
     optimizer.zero_grad()
     if log_writer is not None:
         print('log_dir: {}'.format(log_writer.log_dir))
-    # switch to ema params
     
     for data_iter_step, (samples, labels) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
 
@@ -52,12 +50,8 @@ def train_one_epoch(model, vae,
         labels = labels.to(device, non_blocking=True)
 
         with torch.no_grad():
-            if args.use_cached:
-                moments = samples
-                posterior = GaussianDistribution(moments, std=args.std)
-            else:
-                with vae.ema_scope():
-                    posterior = vae.encode(samples)
+            with vae.ema_scope():
+                posterior = vae.encode(samples)
             
             # normalize the std of latent to be 1. Change it if you use a different tokenizer
             x = posterior.sample().mul_(args.vae_norm)
@@ -187,7 +181,7 @@ def evaluate(model_without_ddp, vae, ema_params, args, epoch, batch_size=16, log
         print("Switch back from ema")
         model_without_ddp.load_state_dict(model_state_dict)
     
-    if log_writer is not None:
+    if log_writer is not None and args.metrics == True:
         if args.img_size == 256:
             input2 = None
             fid_statistics_file = 'fid_stats/adm_in256_stats.npz'
@@ -218,32 +212,3 @@ def evaluate(model_without_ddp, vae, ema_params, args, epoch, batch_size=16, log
 
     torch.distributed.barrier()
     time.sleep(10)
-    
-def cache_latents(vae,
-                  data_loader: Iterable,
-                  device: torch.device,
-                  args=None):
-    metric_logger = misc.MetricLogger(delimiter="  ")
-    header = 'Caching: '
-    print_freq = 20
-
-    for data_iter_step, (samples, _, paths) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
-
-        samples = samples.to(device, non_blocking=True)
-
-        with torch.no_grad():
-            with vae.ema_scope():
-                posterior = vae.encode(samples)
-                moments = posterior.parameters
-                posterior_flip = vae.encode(samples.flip(dims=[3]))
-                moments_flip = posterior_flip.parameters
-
-        for i, path in enumerate(paths):
-            save_path = os.path.join(args.cached_path, path + '.npz')
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            np.savez(save_path, moments=moments[i].cpu().numpy(), moments_flip=moments_flip[i].cpu().numpy())
-
-        if misc.is_dist_avail_and_initialized():
-            torch.cuda.synchronize()
-
-    return

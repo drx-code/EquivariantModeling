@@ -42,11 +42,11 @@ def get_args_parser():
             return False
         else:
             raise argparse.ArgumentTypeError("Boolean value expected.")
-    parser = argparse.ArgumentParser('Training', add_help=False)
+    parser = argparse.ArgumentParser('Generator evaluation', add_help=False)
     parser.add_argument('--batch_size', default=16, type=int,
                         help='Batch size per GPU (effective batch size is batch_size * # gpus')
 
-    # Model parameters
+    # Model size parameters
     parser.add_argument('--model', default='large_model', type=str, metavar='MODEL',
                         help='Name of model to train')
 
@@ -57,6 +57,8 @@ def get_args_parser():
                         help='vae output embedding dimension')
     parser.add_argument('--vae_norm', default=0.2325, type=float, required=True)
     parser.add_argument('--token_num', default=128, type=int)
+    parser.add_argument('--config_path', default='', help='path to config file')
+    parser.add_argument("--std", default=2.5, type=float)
 
     # Generation parameters
     parser.add_argument('--num_iter', default=64, type=int,
@@ -68,6 +70,7 @@ def get_args_parser():
     parser.add_argument('--label_drop_prob', default=0.1, type=float)
     parser.add_argument('--evaluate', action='store_true')
     parser.add_argument('--eval_bsz', type=int, default=64, help='generation batch size')
+    parser.add_argument('--metrics', type=str2bool, nargs="?", const=True, default=False)
 
     # Optimizer parameters
     parser.add_argument('--weight_decay', type=float, default=0.02,
@@ -76,12 +79,14 @@ def get_args_parser():
     parser.add_argument('--grad_checkpointing', action='store_true')
     parser.add_argument('--ema_rate', default=0.9999, type=float)
     
-    # params
+    # Transformer model parameters
     parser.add_argument('--attn_dropout', type=float, default=0.1,
                         help='attention dropout')
     parser.add_argument('--proj_dropout', type=float, default=0.1,
                         help='projection dropout')
     parser.add_argument('--buffer_size', type=int, default=64)
+    parser.add_argument("--cond_length", default=0, type=int)
+    parser.add_argument("--shift_num", type=int, default=16)
 
     # Diffusion Loss params
     parser.add_argument('--diffloss_d', type=int, default=12)
@@ -110,8 +115,10 @@ def get_args_parser():
                         help='Pin CPU memory in DataLoader for more efficient (sometimes) transfer to GPU.')
     parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
     parser.set_defaults(pin_mem=True)
+    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False)
+    parser.add_argument('--ckpt', default='checkpoint-last.pth', help='path to checkpoint file')
 
-    # distributed training parameters
+    # Distributed training parameters
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
     parser.add_argument('--local_rank', default=-1, type=int)
@@ -119,18 +126,6 @@ def get_args_parser():
     parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
 
-    # caching latents
-    parser.add_argument('--use_cached', action='store_true', dest='use_cached',
-                        help='Use cached latents')
-    parser.set_defaults(use_cached=False)
-    parser.add_argument('--cached_path', default='', help='path to cached latents')
-    parser.add_argument('--config_path', default='', help='path to config  file')
-    parser.add_argument('--ckpt', default='checkpoint-last.pth', help='path to checkpoint file')
-    parser.add_argument("--learn_sigma", type=str2bool, nargs="?", const=True, default=False)
-    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False)
-    parser.add_argument("--cond_length", default=0, type=int)
-    parser.add_argument("--std", default=2.5, type=float)
-    parser.add_argument("--shift_num", type=int, default=16)
     return parser
 
 
@@ -159,7 +154,7 @@ def main(args):
     else:
         log_writer = None
         
-    # define the vae and mar model
+    # define the vae and generative model
     config = OmegaConf.load(args.config_path)
     vae = instantiate_from_config(config["model"]).cuda().eval()
 
@@ -177,7 +172,6 @@ def main(args):
         diffusion_batch_mul=args.diffusion_batch_mul,
         grad_checkpointing=args.grad_checkpointing,
         token_num=args.token_num,
-        learn_sigma=args.learn_sigma,
         cond_length = args.cond_length,
         shift_num = args.shift_num
     )
