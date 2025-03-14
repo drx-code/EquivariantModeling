@@ -1,0 +1,2 @@
+from tokenizer.modules.losses.vqperceptual import DummyLoss
+from tokenizer.modules.losses.contperceptual import LPIPSWithDiscriminator

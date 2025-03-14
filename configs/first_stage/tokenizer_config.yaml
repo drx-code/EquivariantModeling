@@ -1,0 +1,75 @@
+model:
+  base_learning_rate: 1.92e-4
+  target: tokenizer.models.vqgan.EquivariantTokenizer
+  params:
+    embed_dim: 256
+    use_ema: true
+    post_channels: 4096
+    std: 2.5
+    ddconfig:
+      double_enc: false
+      z_channels: 256
+      resolution: 256
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult:
+      - 1
+      - 1
+      - 2
+      - 4
+      - 4
+      num_res_blocks: 2
+      dropout: 0.0
+      attn_resolutions:
+      - 16
+      len_down_scale: 4
+      semantic_map: res
+    sematicconfig:
+      z_channels: 256
+      resolution: 256
+      in_channels: 3
+      out_ch: 768
+      ch: 64
+      ch_mult:
+      - 8
+      - 12
+      num_res_blocks: 2
+      dropout: 0.0
+      attn_resolutions: []
+      downsample_scale: 0
+    lossconfig:
+      target: tokenizer.modules.losses.contperceptual.LPIPSWithDiscriminator
+      params:
+        disc_conditional: false
+        disc_in_channels: 3
+        disc_start: 5001
+        kl_weight: 0.01
+        disc_weight: 0.5
+        disc_type: dino
+        semantic_loss_w: 0.0
+        semantic_iter_start: 20001
+    scheduler_config:
+      target: tokenizer.lr_scheduler.LambdaWarmUpDecayScheduler
+      params:
+        lr_max: 1.0
+        lr_min: 0.0
+        lr_start: 0.0
+        warm_up_steps: 3000
+        interval: 30000
+        decay: 0.2
+data:
+  target: train_tokenizer.DataModuleFromConfig
+  params:
+    batch_size: 12
+    num_workers: 24
+    train:
+      target: tokenizer.data.imagenet.ImageNetTrain
+      params:
+        config:
+          size: 256
+    validation:
+      target: tokenizer.data.imagenet.ImageNetValidation
+      params:
+        config:
+          size: 256
