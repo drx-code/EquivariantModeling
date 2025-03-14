@@ -56,7 +56,7 @@ def get_args_parser():
     parser.add_argument('--vae_embed_dim', default=16, type=int,
                         help='vae output embedding dimension')
     parser.add_argument('--vae_norm', default=0.2325, type=float, required=True)
-    parser.add_argument('--token_num', default=128, type=int)
+    parser.add_argument('--token_num', default=128, type=int, help='tokens number')
     parser.add_argument('--config_path', default='', help='path to config file')
     parser.add_argument("--std", default=2.5, type=float)
 
@@ -66,7 +66,7 @@ def get_args_parser():
     parser.add_argument('--num_images', default=50000, type=int,
                         help='number of images to generate')
     parser.add_argument('--cfg', default=1.0, type=float, help="classifier-free guidance")
-    parser.add_argument('--cfg_schedule', default="linear", type=str)
+    parser.add_argument('--cfg_schedule', default="linear", type=str, help="cfg schedule")
     parser.add_argument('--label_drop_prob', default=0.1, type=float)
     parser.add_argument('--evaluate', action='store_true')
     parser.add_argument('--eval_bsz', type=int, default=64, help='generation batch size')
@@ -85,8 +85,8 @@ def get_args_parser():
     parser.add_argument('--proj_dropout', type=float, default=0.1,
                         help='projection dropout')
     parser.add_argument('--buffer_size', type=int, default=64)
-    parser.add_argument("--cond_length", default=0, type=int)
-    parser.add_argument("--shift_num", type=int, default=16)
+    parser.add_argument("--cond_length", default=0, type=int, help="window attention size")
+    parser.add_argument("--shift_num", type=int, default=16, help="the range of random augmentaion")
 
     # Diffusion Loss params
     parser.add_argument('--diffloss_d', type=int, default=12)
@@ -115,7 +115,7 @@ def get_args_parser():
                         help='Pin CPU memory in DataLoader for more efficient (sometimes) transfer to GPU.')
     parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
     parser.set_defaults(pin_mem=True)
-    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False)
+    parser.add_argument("--float32", type=str2bool, nargs="?", const=True, default=False, help="use float32 training or not")
     parser.add_argument('--ckpt', default='checkpoint-last.pth', help='path to checkpoint file')
 
     # Distributed training parameters

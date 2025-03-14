@@ -6,7 +6,7 @@ model:
     use_ema: true
     post_channels: 4096
     std: 2.5
-    ckpt_path: ckpt/tokenizer.ckpt
+    ckpt_path: pretrained_models/tokenizer.ckpt
     stage2: true
     ddconfig:
       double_enc: false

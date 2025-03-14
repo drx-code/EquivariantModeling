@@ -6,6 +6,8 @@ model:
     use_ema: true
     post_channels: 4096
     std: 2.5
+    stage2: true
+    ckpt_path: stage1.ckpt
     ddconfig:
       double_enc: false
       z_channels: 256
@@ -47,7 +49,7 @@ model:
         kl_weight: 0.01
         disc_weight: 0.5
         disc_type: dino
-        semantic_loss_w: 5.0
+        semantic_loss_w: 0.0
         semantic_iter_start: 20001
     scheduler_config:
       target: tokenizer.lr_scheduler.LambdaWarmUpDecayScheduler

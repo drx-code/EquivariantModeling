@@ -1,5 +1,7 @@
 # An equivariant image modeling framework <br><sub></sub>
 
+[![huggingface](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-EquivariantModeling-yellow)](https://huggingface.co/UmiSonoda16/EquivariantModeling)&nbsp;
+
 <p align="center">
   <img src="demo/visual.png" width="720">
 </p>
@@ -15,9 +17,9 @@ Evaluated on class-conditioned ImageNet generation at 256×256 resolution, our a
 
 This repo contains:
 
-* 🪐 A simple PyTorch implementation of [Equivariant 1D Tokenizer](tokenizer/models/tokenizer.py) and [Equivariant Generator](generator/equ_modeling.py).
+* 🪐 A simple PyTorch implementation of our [equivariant 1D tokenizer](tokenizer/models/tokenizer.py) and [equivariant generator](generator/equ_modeling.py).
 * 💥 Pre-trained equivariant tokenizer trained on the ImageNet-1k dataset together with class-conditional equivariant generative model trained on the selected Places dataset (30 labels).
-* 🛸 The training scripts of [equivariant tokenizer](scripts/train_tokenizer.py) using PyTorch-Lightning and [equivariant generator](scripts/train_generator.py) utilizing PyTorch DDP.
+* 🛸 The training scripts of [equivariant 1D tokenizer](scripts/train_tokenizer.py) using PyTorch-Lightning and [equivariant generator](scripts/train_generator.py) utilizing PyTorch DDP.
 * 🦄 The evaluation script of [equivariant generator](scripts/eval_generator.py) which samples high-fidelity images.
 * 🎉 A self-contained [jupyter notebook]() for checking out the visual meanings of 1D tokens.
 
@@ -66,9 +68,9 @@ Our pre-trained tokenizer and generative models can be downloaded directly here:
 ### Tokenizer Training
 Example configs for training the tokenizer has been provided at [first_stage_config](configs/first_stage/tokenizer_config.yaml).
 
-First, replace the `cached_dir` in the config file with your ImageNet dataset path `IMAGENET_PATH`.
+First, pass your ImageNet dataset path `IMAGENET_PATH` to the `cached_dir` term in the config file.
 
-Scripts for training our equivariant tokenizer with the ImageNet dataset:
+Script for training our equivariant 1D tokenizer with the ImageNet dataset:
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
 scripts/train_tokenizer.py \
@@ -77,8 +79,10 @@ scripts/train_tokenizer.py \
 ```
 Logs and checkpoints for trained models are saved to `logs/<START_DATE_AND_TIME>_<config_spec>`.
 
+* To fine-tune the decoder which enhances the reconstruction ability, replace the `configs/first_stage/tokenizer_config.yaml` with `configs/first_stage/tokenizer_config_stage2.yaml`.
+
 ### Generator Training
-The training of our equivariant generator with ImageNet-1k can be started by running 
+The training of our equivariant generators with the ImageNet can be started by running 
 * Our small geneator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
@@ -88,7 +92,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --log_dir ${SAVE_PATH}  \
+    --output_dir ${SAVE_PATH}  --resume ${RESUME_PATH} --ckpt ${CKPT_PATH}\
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
@@ -101,7 +105,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --log_dir ${SAVE_PATH}  \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
@@ -114,7 +118,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --log_dir ${SAVE_PATH}  \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
@@ -127,7 +131,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --log_dir ${SAVE_PATH}  \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 The training of our equivariant generator with filtered Places dataset (30 labels) can be started by running
@@ -139,11 +143,49 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
     --config_path configs/second_stage/tokenizer_config.yaml \
-    --output_dir ${SAVE_PATH} --log_dir ${SAVE_PATH}  \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
     --data_path ${PLACES_PATH}
 ```
 
+* (Optional) To save GPU memory during training by reducing the parameters precision, remove --float32 in the arguments. Note that this may significantly harm the training stability.
+
+* (Optional) To save GPU memory during training by using gradient checkpointing, add --grad_checkpointing to the arguments. Note that this may slightly reduce training speed.
+
 ## ⛅ Evaluation & Sampling 
+### ImageNet-1k 256x256
+
+Evaluate our geneative model trained on the ImageNet dataset with classifier-free guidance:
+```
+torchrun --nproc_per_node=8 --nnodes=1 --master_addr=${MASTER_ADDR} \
+    eval_generator.py \
+    --model huge_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
+    --diffloss_d 12 --diffloss_w 1536 --cond_length 3 \
+    --eval_bsz 64 --float32\
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --config_path configs/second_stage/tokenizer_config.yaml\
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --num_images 50000 --cfg 7.0 \
+```
+
+* (Optional) To calculate the Frechet Inception Distance (gFID) and the Inception Score (IS) metrics, add --metrics to the arguments.
+* Set --cfg 1.0 to evaluate without classifier-free guidance.
+
+### Places: Long-content Images
+Sampling long images with a length of `LENGTH` using the generative model trained on the Places with classifier-free guidance:
+```
+torchrun --nproc_per_node=8 --nnodes=1 --master_addr=${MASTER_ADDR} \
+    eval_generator.py \
+    --model large_model --vae_embed_dim 256 --token_num ${LENGTH} --num_iter ${LENGTH} \
+    --diffloss_d 12 --diffloss_w 1024 --cond_length 3 --class_num 30\
+    --eval_bsz 64 --float32\
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --config_path configs/second_stage/tokenizer_config.yaml\
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --num_images 3000 --cfg 7.0 \
+```
+
+* To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_PATH` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
+
 
 ## Acknowledgements
 
