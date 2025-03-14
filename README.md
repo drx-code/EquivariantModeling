@@ -200,7 +200,7 @@ We believe the equivariant 1D tokenizer has strong spatial decoupling property: 
 
 ## Acknowledgements
 
-The code in this repo is mainly based on [Taming-Transformers](https://github.com/CompVis/taming-transformers), [Latent-Diffusion](https://github.com/CompVis/latent-diffusion), and [MAR](https://github.com/LTH14/mar).
+The code in this repo is mainly based on [Taming-Transformers](https://github.com/CompVis/taming-transformers), [Latent-Diffusion](https://github.com/CompVis/latent-diffusion) and [MAR](https://github.com/LTH14/mar).
 
 ## License
 This repository is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
