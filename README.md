@@ -3,7 +3,7 @@
 [![huggingface](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-EquivariantModeling-yellow)](https://huggingface.co/UmiSonoda16/EquivariantModeling)&nbsp;
 
 <p align="center">
-  <img src="demo/visual.png" width="720">
+  <img src="demo/visual.png" width="1080">
 </p>
 
 This is an official PyTorch/GPU implementation of the paper ”An equivariant image modeling framework“
@@ -195,7 +195,7 @@ torchrun --nproc_per_node=8 --nnodes=1 \
 ## ⏰ Visual meanings of tokens encoded from the equivariant 1D tokenizer
 We believe the equivariant 1D tokenizer has strong spatial decoupling property: by progressively replacing the randomly initialized token sequence with tokens encoded from the ground truth images, the decoder faithfully reconstructs the original images step by step. The code can be found in [Token Meaning](demo/token_meaning.ipynb).
 <p align="center">
-  <img src="demo/token_meaning.gif" width="720">
+  <img src="demo/token_meaning.gif" width="360">
 </p>
 
 ## Acknowledgements
