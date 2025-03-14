@@ -136,9 +136,9 @@ class ImageNetTrain(ImageNetBase):
     def _prepare(self):
         self.random_crop = retrieve(self.config, "ImageNetTrain/random_crop",
                                     default=True)
-        cachedir = self.config["cachedir"]
+        datadir = self.config["datadir"]
         self.random_flip = True
-        self.root = os.path.join(cachedir, "autoencoders/data", self.NAME)
+        self.root = os.path.join(datadir, "autoencoders/data", self.NAME)
         self.datadir = os.path.join(self.root, "data")
         self.txt_filelist = os.path.join(self.root, "filelist.txt")
         self.expected_length = 1281167
@@ -195,9 +195,9 @@ class ImageNetValidation(ImageNetBase):
     def _prepare(self):
         self.random_crop = retrieve(self.config, "ImageNetValidation/random_crop",
                                     default=False)
-        cachedir = self.config["cachedir"]
+        datadir = self.config["datadir"]
         self.random_flip = False
-        self.root = os.path.join(cachedir, "autoencoders/data", self.NAME)
+        self.root = os.path.join(datadir, "autoencoders/data", self.NAME)
         self.datadir = os.path.join(self.root, "data")
         self.txt_filelist = os.path.join(self.root, "filelist.txt")
         self.expected_length = 50000

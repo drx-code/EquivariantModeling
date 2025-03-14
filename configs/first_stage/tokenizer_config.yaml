@@ -59,7 +59,7 @@ model:
         interval: 30000
         decay: 0.2
 data:
-  target: train_tokenizer.DataModuleFromConfig
+  target: scripts.train_tokenizer.DataModuleFromConfig
   params:
     batch_size: 12
     num_workers: 24
@@ -67,9 +67,11 @@ data:
       target: tokenizer.data.imagenet.ImageNetTrain
       params:
         config:
+          datadir:
           size: 256
     validation:
       target: tokenizer.data.imagenet.ImageNetValidation
       params:
         config:
+          datadir:
           size: 256

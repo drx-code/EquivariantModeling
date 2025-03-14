@@ -98,13 +98,6 @@ def get_parser(**parser_kwargs):
         help="number of nodes",
     )
     parser.add_argument(
-        "-ngpu",
-        "--num_gpu",
-        type=int,
-        default=8,
-        help="number of gpus per node",
-    )
-    parser.add_argument(
         "-f",
         "--postfix",
         type=str,
@@ -115,7 +108,6 @@ def get_parser(**parser_kwargs):
         "--scale_lr",
         type=str2bool,
         nargs="?",
-        const=True,
         default=False,
         help="scale base-lr by ngpu * batch_size * n_accumulate",
     )
@@ -420,17 +412,17 @@ if __name__ == "__main__":
         trainer_config["distributed_backend"] = "ddp"
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
-        # if not "gpus" in trainer_config:
-        #     del trainer_config["distributed_backend"]
-        #     cpu = True
-        # else:
-        #     gpuinfo = trainer_config["gpus"]
-        #     print(f"Running on GPUs {gpuinfo}")
-        #     cpu = False
+        if not "gpus" in trainer_config:
+            del trainer_config["distributed_backend"]
+            cpu = True
+        else:
+            gpuinfo = trainer_config["gpus"]
+            print(f"Running on GPUs {gpuinfo}")
+            cpu = False
         
         # change the number of used nodes
         trainer_config["num_nodes"] = opt.nodes
-        
+
         trainer_opt = argparse.Namespace(**trainer_config)
         lightning_config.trainer = trainer_config
 
@@ -498,7 +490,7 @@ if __name__ == "__main__":
         # add callback which sets up log directory
         default_callbacks_cfg = {
             "setup_callback": {
-                "target": "train_tokenizer.SetupCallback",
+                "target": "scripts.train_tokenizer.SetupCallback",
                 "params": {
                     "resume": opt.resume,
                     "now": now,
@@ -510,7 +502,7 @@ if __name__ == "__main__":
                 }
             },
             "image_logger": {
-                "target": "train_tokenizer.ImageLogger",
+                "target": "scripts.train_tokenizer.ImageLogger",
                 "params": {
                     "batch_frequency": 750,
                     "max_images": 4,
@@ -518,7 +510,7 @@ if __name__ == "__main__":
                 }
             },
             "learning_rate_logger": {
-                "target": "train_tokenizer.LearningRateMonitor",
+                "target": "scripts.train_tokenizer.LearningRateMonitor",
                 "params": {
                     "logging_interval": "step",
                     #"log_momentum": True
@@ -546,7 +538,10 @@ if __name__ == "__main__":
 
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
-        ngpu = opt.num_gpu
+        if not cpu:
+            ngpu = len(lightning_config.trainer.gpus.strip(",").split(','))
+        else:
+            ngpu = 1
         if 'accumulate_grad_batches' in lightning_config.trainer:
             accumulate_grad_batches = lightning_config.trainer.accumulate_grad_batches
         else:

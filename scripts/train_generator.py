@@ -178,6 +178,7 @@ def main(args):
         log_writer = None
     # augmentation following DiT and ADM
     transform_train = transforms.Compose([
+        transforms.Resize(args.img_size),
         transforms.RandomCrop(args.img_size),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),

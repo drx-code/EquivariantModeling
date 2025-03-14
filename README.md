@@ -74,14 +74,14 @@ For convenience, pre-trained models can be downloaded directly here as well:
 ### Tokenizer Training
 Example configs for training the tokenizer has been provided at [first_stage_config](configs/first_stage/tokenizer_config.yaml).
 
-First, pass your ImageNet dataset path `IMAGENET_PATH` to the `cached_dir` term in the config file.
+First, pass your ImageNet dataset path `IMAGENET_PATH` to the `datadir` term in the config file.
 
 Script for training our equivariant 1D tokenizer with the ImageNet dataset:
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-scripts/train_tokenizer.py \
--t True -nodes ${NODE_RANK} -ngpu 8 \
--b configs/first_stage/tokenizer_config.yaml
+    scripts/train_tokenizer.py \
+    -t True -nodes ${NUM_NODES} --gpus 0,1,2,3,4,5,6,7 \
+    -b configs/first_stage/tokenizer_config.yaml
 ```
 Logs and checkpoints for trained models are saved to `logs/<START_DATE_AND_TIME>_<config_spec>`.
 
@@ -92,64 +92,64 @@ The training of our equivariant generators with the ImageNet can be started by r
 * Our small generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    train_generator.py \
+    scripts/train_generator.py \
     --model small_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 960 --cond_length 3 \
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH}  --resume ${RESUME_PATH} --ckpt ${CKPT_PATH}\
+    --output_dir ${SAVE_PATH}  --resume ${RESUME_PATH} --ckpt ${CKPT_NAME}\
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
 * Our base generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    train_generator.py \
+    scripts/train_generator.py \
     --model base_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1024 --cond_length 3 \
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
 * Our large generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    train_generator.py \
+    scripts/train_generator.py \
     --model large_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1280 --cond_length 3 \
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 
 * Our huge generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    train_generator.py \
+    scripts/train_generator.py \
     --model huge_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1536 --cond_length 3 \
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
 The training of our equivariant generator with filtered Places dataset (30 labels) can be started by running
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    train_generator.py \
+    scripts/train_generator.py \
     --model large_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1280 --cond_length 3 --class_num 30\
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml \
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --data_path ${PLACES_PATH}
 ```
 
@@ -162,14 +162,14 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
 
 Evaluate our geneative model trained on the ImageNet dataset with classifier-free guidance:
 ```
-torchrun --nproc_per_node=8 --nnodes=1 --master_addr=${MASTER_ADDR} \
-    eval_generator.py \
+torchrun --nproc_per_node=8 --nnodes=1 \
+    scripts/eval_generator.py \
     --model huge_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1536 --cond_length 3 \
     --eval_bsz 64 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --num_images 50000 --cfg 7.0 \
 ```
 
@@ -179,19 +179,24 @@ torchrun --nproc_per_node=8 --nnodes=1 --master_addr=${MASTER_ADDR} \
 ### Places: Long-content Images
 Sampling long images with a length of `LENGTH` using the generative model trained on the Places with classifier-free guidance:
 ```
-torchrun --nproc_per_node=8 --nnodes=1 --master_addr=${MASTER_ADDR} \
-    eval_generator.py \
+torchrun --nproc_per_node=8 --nnodes=1 \
+    scripts/eval_generator.py \
     --model large_model --vae_embed_dim 256 --token_num ${LENGTH} --num_iter ${LENGTH} \
     --diffloss_d 12 --diffloss_w 1024 --cond_length 3 --class_num 30\
     --eval_bsz 64 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \ 
+    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_PATH} \
+    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
     --num_images 3000 --cfg 7.0 \
 ```
 
-* To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_PATH` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
+* To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_NAME` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
 
+## ⏰ Visual meanings of tokens encoded from the equivariant 1D tokenizer
+We believe the equivariant 1D tokenizer has strong spatial decoupling property: by progressively replacing the randomly initialized token sequence with tokens encoded from the ground truth images, the decoder faithfully reconstructs the original images step by step. The code can be found in [Token Meaning](demo/token_meaning.ipynb).
+<p align="center">
+  <img src="demo/token_meaning.gif" width="720">
+</p>
 
 ## Acknowledgements
 
