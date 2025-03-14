@@ -1,0 +1,44 @@
+model:
+  base_learning_rate: 1.92e-4
+  target: tokenizer.models.tokenizer.EquivariantTokenizer
+  params:
+    embed_dim: 256
+    use_ema: true
+    post_channels: 4096
+    std: 2.5
+    ckpt_path: pretrained_models/tokenizer.ckpt
+    stage2: true
+    ddconfig:
+      double_enc: false
+      z_channels: 256
+      resolution: 256
+      in_channels: 3
+      out_ch: 3
+      ch: 128
+      ch_mult:
+      - 1
+      - 1
+      - 2
+      - 4
+      - 4
+      num_res_blocks: 2
+      dropout: 0.0
+      attn_resolutions:
+      - 16
+      len_down_scale: 4
+      semantic_map: res
+    sematicconfig:
+      z_channels: 256
+      resolution: 256
+      in_channels: 3
+      out_ch: 768
+      ch: 64
+      ch_mult:
+      - 8
+      - 12
+      num_res_blocks: 2
+      dropout: 0.0
+      attn_resolutions: []
+      downsample_scale: 0
+    lossconfig:
+      target: tokenizer.modules.losses.DummyLoss
