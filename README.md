@@ -182,7 +182,7 @@ Sampling long images with a length of `LENGTH` using the generative model traine
 torchrun --nproc_per_node=8 --nnodes=1 \
     scripts/eval_generator.py \
     --model large_model --vae_embed_dim 256 --token_num ${LENGTH} --num_iter ${LENGTH} \
-    --diffloss_d 12 --diffloss_w 1024 --cond_length 3 --class_num 30\
+    --diffloss_d 12 --diffloss_w 1280 --cond_length 3 --class_num 30\
     --eval_bsz 64 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
