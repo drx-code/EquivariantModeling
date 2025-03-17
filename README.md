@@ -153,9 +153,9 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     --data_path ${PLACES_PATH}
 ```
 
-* (Optional) To save GPU memory during training by reducing the parameters precision, remove --float32 in the arguments. Note that this may significantly harm the training stability.
+* (Optional) To save GPU memory during training by reducing the parameters precision, remove `--float32` in the arguments. Note that this may significantly harm the training stability.
 
-* (Optional) To save GPU memory during training by using gradient checkpointing, add --grad_checkpointing to the arguments. Note that this may slightly reduce training speed.
+* (Optional) To save GPU memory during training by using gradient checkpointing, add `--grad_checkpointing` to the arguments. Note that this may slightly reduce training speed.
 
 ## ⛅ Evaluation & Sampling 
 ### ImageNet-1k 256x256
@@ -173,8 +173,8 @@ torchrun --nproc_per_node=8 --nnodes=1 \
     --num_images 50000 --cfg 7.0 \
 ```
 
-* (Optional) To calculate the Frechet Inception Distance (gFID) and the Inception Score (IS) metrics, add --metrics to the arguments.
-* Set --cfg 1.0 to evaluate without classifier-free guidance.
+* (Optional) To calculate the Frechet Inception Distance (FID) and the Inception Score (IS) metrics, add `--metrics` to the arguments.
+* Set `--cfg 1.0` to evaluate without classifier-free guidance.
 
 ### Places: Long-content Images
 Sampling long images with a length of `LENGTH` using the generative model trained on the Places with classifier-free guidance:
