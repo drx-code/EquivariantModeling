@@ -193,9 +193,17 @@ torchrun --nproc_per_node=8 --nnodes=1 \
 * To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_NAME` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
 
 ## ⏰ Visual meanings of tokens encoded from the equivariant 1D tokenizer
-We believe the equivariant 1D tokenizer has strong spatial decoupling property: by progressively replacing the randomly initialized token sequence with tokens encoded from the ground truth images, the decoder faithfully reconstructs the original images step by step. The code can be found in [Token Meaning](demo/token_meaning.ipynb).
+
+**In our tokenizer, each token corresponds to a informative area.** By progressively replacing randomly initialized token sequences with tokens encoded from ground truth images, the decoder faithfully reconstructs the original images step by step. The code can be found in [Token Meaning](demo/token_meaning.ipynb).
+
 <p align="center">
   <img src="demo/token_meaning.gif" width="360">
+</p>
+
+The prediction phase shows a similar pattern: each token immediately reflects the generation quality of its corresponding vertical area.
+
+<p align="center">
+  <img src="demo/pred_token_decoding.gif" width="360">
 </p>
 
 ## Acknowledgements
