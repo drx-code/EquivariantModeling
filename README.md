@@ -89,57 +89,19 @@ Logs and checkpoints for trained models are saved to `logs/<START_DATE_AND_TIME>
 
 ### Generator Training
 The training of our equivariant generators with the ImageNet can be started by running 
-* Our small generator
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     scripts/train_generator.py \
-    --model small_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w 960 --cond_length 3 \
+    --model $MODEL_SIZE --vae_embed_dim 256 --token_num 16 --num_iter 16 \
+    --diffloss_d 12 --diffloss_w $DIFF_WIDTH --cond_length 3 \
     --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
     --output_dir ${SAVE_PATH}  --resume ${RESUME_PATH} --ckpt ${CKPT_NAME}\
     --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
 ```
+* `MODEL_SIZE` can be chosen from [`small_model`, `base_model`, `large_model`, `huge_model`], with corresponding `DIFF_WIDTH` values of [960, 1024, 1280, 1536] respectively.
 
-* Our base generator
-```
-torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    scripts/train_generator.py \
-    --model base_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w 1024 --cond_length 3 \
-    --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
-    --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
-    --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
-```
-
-* Our large generator
-```
-torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    scripts/train_generator.py \
-    --model large_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w 1280 --cond_length 3 \
-    --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
-    --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
-    --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
-```
-
-* Our huge generator
-```
-torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
-    scripts/train_generator.py \
-    --model huge_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w 1536 --cond_length 3 \
-    --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
-    --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
-    --data_path ${IMAGENET_PATH}/autoencoders/data/ILSVRC2012_train/data/
-```
 The training of our equivariant generator with filtered Places dataset (30 labels) can be started by running
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
@@ -158,24 +120,6 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
 * (Optional) To save GPU memory during training by using gradient checkpointing, add `--grad_checkpointing` to the arguments. Note that this may slightly reduce training speed.
 
 ## ⛅ Evaluation & Sampling 
-### ImageNet-1k 256x256
-
-Evaluate our geneative model trained on the ImageNet dataset with classifier-free guidance:
-```
-torchrun --nproc_per_node=8 --nnodes=1 \
-    scripts/eval_generator.py \
-    --model huge_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w 1536 --cond_length 3 \
-    --eval_bsz 64 --float32\
-    --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
-    --config_path configs/second_stage/tokenizer_config.yaml\
-    --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
-    --num_images 50000 --cfg 7.0 \
-```
-
-* (Optional) To calculate the Frechet Inception Distance (FID) and the Inception Score (IS) metrics, add `--metrics` to the arguments.
-* Set `--cfg 1.0` to evaluate without classifier-free guidance.
-
 ### Places: Long-content Images
 Sampling long images with a length of `LENGTH` using the generative model trained on the Places with classifier-free guidance:
 ```
@@ -191,6 +135,8 @@ torchrun --nproc_per_node=8 --nnodes=1 \
 ```
 
 * To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_NAME` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
+<!-- * (Optional) To calculate the Frechet Inception Distance (FID) and the Inception Score (IS) metrics, add `--metrics` to the arguments. -->
+* Set `--cfg 1.0` to evaluate without classifier-free guidance.
 
 ## ⏰ Visual meanings of tokens encoded from the equivariant 1D tokenizer
 
