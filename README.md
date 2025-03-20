@@ -21,7 +21,7 @@ This repo contains:
 * 💥 Pre-trained equivariant tokenizer trained on the ImageNet-1k dataset together with class-conditional equivariant generative model trained on the selected Places dataset (30 labels).
 * 🛸 The training scripts of [equivariant 1D tokenizer](scripts/train_tokenizer.py) using PyTorch-Lightning and [equivariant generator](scripts/train_generator.py) utilizing PyTorch DDP.
 * 🦄 The evaluation script of [equivariant generator](scripts/eval_generator.py) which samples high-fidelity images.
-* 🎉 A self-contained [jupyter notebook]() for checking out the visual meanings of 1D tokens.
+* 🎉 A self-contained [jupyter notebook](demo/token_meaning.ipynb) for checking out the visual meanings of 1D tokens.
 
 
 ## 🌿 Preparation
