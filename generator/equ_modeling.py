@@ -521,7 +521,7 @@ class EquivariantGenerativeModel(nn.Module):
                 z = x[:, step]
                 # cfg schedule follow Muse
                 if cfg_schedule == "linear":
-                    cfg_iter = 1 + (cfg - 1) * (self.seq_len - (num_iter - step - 1)) / self.seq_len
+                    cfg_iter = 1 + (cfg - 1) * (step + 1.) / num_iter
                 elif cfg_schedule == "constant":
                     cfg_iter = cfg
                 else:
