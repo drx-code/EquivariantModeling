@@ -85,16 +85,16 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
 ```
 Logs and checkpoints for trained models are saved to `logs/<START_DATE_AND_TIME>_<config_spec>`.
 
-* To fine-tune the decoder which enhances the reconstruction ability, replace the `configs/first_stage/tokenizer_config.yaml` with `configs/first_stage/tokenizer_config_stage2.yaml`.
+* To fine-tune the decoder which enhances the reconstruction ability, replace the `configs/first_stage/tokenizer_config.yaml` with `configs/first_stage/tokenizer_config_stage2.yaml` and set `ckpt_path` to your pre-trained checkpoint path.
 
 ### Generator Training
 The training of our equivariant generators with the ImageNet can be started by running 
 ```
 torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --master_addr=${MASTER_ADDR} \
     scripts/train_generator.py \
-    --model $MODEL_SIZE --vae_embed_dim 256 --token_num 16 --num_iter 16 \
-    --diffloss_d 12 --diffloss_w $DIFF_WIDTH --cond_length 3 \
-    --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
+    --model ${MODEL_SIZE} --vae_embed_dim 256 --token_num 16 --num_iter 16 \
+    --diffloss_d 12 --diffloss_w ${DIFF_WIDTH} --cond_length 3 \
+    --epochs 1200 --warmup_epochs 100 --batch_size ${BATCH_SIZE} --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml\
     --output_dir ${SAVE_PATH}  --resume ${RESUME_PATH} --ckpt ${CKPT_NAME}\
@@ -108,7 +108,7 @@ torchrun --nproc_per_node=8 --nnodes=${NUM_NODES} --node_rank=${NODE_RANK} --mas
     scripts/train_generator.py \
     --model large_model --vae_embed_dim 256 --token_num 16 --num_iter 16 \
     --diffloss_d 12 --diffloss_w 1280 --cond_length 3 --class_num 30\
-    --epochs 1200 --warmup_epochs 100 --batch_size 64 --blr 1.0e-4 --float32\
+    --epochs 1200 --warmup_epochs 100 --batch_size ${BATCH_SIZE} --blr 1.0e-4 --float32\
     --diffusion_batch_mul 4 --buffer_size 16 --vae_norm 0.05493 \
     --config_path configs/second_stage/tokenizer_config.yaml \
     --output_dir ${SAVE_PATH} --resume ${RESUME_PATH} --ckpt ${CKPT_NAME} \
