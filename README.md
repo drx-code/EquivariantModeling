@@ -50,7 +50,7 @@ Download the [Places-challenge](http://places2.csail.mit.edu/download.html) data
 
 Download the code:
 ```
-git clone git@github.com:drx-code/EquivariantModeling.git
+git clone https://github.com/drx-code/EquivariantModeling.git
 cd EquivariantModeling
 ```
 
