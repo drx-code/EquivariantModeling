@@ -134,7 +134,7 @@ torchrun --nproc_per_node=8 --nnodes=1 \
     --num_images 3000 --cfg 7.0 \
 ```
 
-* To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_NAME` with `places_large.ckpt`. Moreover, fix the random seed to `1` if you want to reproduce the images shown in our paper.
+* To sample images with pre-trained generative model, set `RESUME_PATH` with `pretrained_models` and `CKPT_NAME` with `places_large.ckpt`. Moreover, fix the random seed to `1` and sample with 8xH20 GPUs if you want to reproduce the images shown in our paper.
 <!-- * (Optional) To calculate the Frechet Inception Distance (FID) and the Inception Score (IS) metrics, add `--metrics` to the arguments. -->
 * Set `--cfg 1.0` to evaluate without classifier-free guidance.
 
