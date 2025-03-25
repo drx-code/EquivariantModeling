@@ -1,12 +1,12 @@
-# An equivariant image modeling framework <br><sub></sub>
+# Equivariant Image Modeling <br><sub></sub>
 
-[![huggingface](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-EquivariantModeling-yellow)](https://huggingface.co/UmiSonoda16/EquivariantModeling)&nbsp;
+[![arXiv](https://img.shields.io/badge/arXiv%20paper-2503.18948-b31b1b.svg)](https://arxiv.org/abs/2503.18948)&nbsp;[![huggingface](https://img.shields.io/badge/%F0%9F%A4%97%20HuggingFace-EquivariantModeling-yellow)](https://huggingface.co/UmiSonoda16/EquivariantModeling)&nbsp;
 
 <p align="center">
   <img src="demo/visual.png" width="1080">
 </p>
 
-This is an official PyTorch/GPU implementation of the paper ”An equivariant image modeling framework“
+This is an official PyTorch/GPU implementation of the paper [Equivariant Image Modeling](https://arxiv.org/abs/2503.18948).
 
 ## ⚡️ Introduction
 We propose a novel equivariant image modeling framework that inherently aligns optimization targets across subtasks in autoregressive image modeling by leveraging the translation invariance of natural visual signals. Our method introduces:
@@ -162,3 +162,17 @@ This repository is licensed under the MIT License - see the [LICENSE](LICENSE) f
 ## Contact
 
 If you have any questions, please contact us through email (dongruixiaoyx@mail.ustc.edu.cn).
+
+## Citation
+If our work contributes to your research, please don't hesitate to give us a star ⭐ or cite us as follows:
+```tex
+@misc{dong2025equivariantimagemodeling,
+      title={Equivariant Image Modeling}, 
+      author={Ruixiao Dong and Mengde Xu and Zigang Geng and Li Li and Han Hu and Shuyang Gu},
+      year={2025},
+      eprint={2503.18948},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2503.18948}, 
+}
+```
