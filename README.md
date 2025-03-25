@@ -165,7 +165,7 @@ If you have any questions, please contact us through email (dongruixiaoyx@mail.u
 
 ## Citation
 If our work contributes to your research, please don't hesitate to give us a star ⭐ or cite us as follows:
-```tex
+```bibtex
 @misc{dong2025equivariantimagemodeling,
       title={Equivariant Image Modeling}, 
       author={Ruixiao Dong and Mengde Xu and Zigang Geng and Li Li and Han Hu and Shuyang Gu},
